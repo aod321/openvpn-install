@@ -182,7 +182,7 @@ else
 	read -p "IP address: " -e -i $IP IP
 	echo ""
 	echo "What port do you want for OpenVPN?"
-	read -p "Port: " -e -i 1194 PORT
+	read -p "Port: " -e -i 440 PORT
 	echo ""
 	echo "What DNS do you want to use with the VPN?"
 	echo "   1) Current system resolvers"
@@ -205,6 +205,8 @@ else
 	else
 		# Else, the distro is CentOS
 		yum install epel-release -y
+		wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+		sudo rpm -Uvh epel-release-7*.rpm
 		yum install openvpn iptables openssl wget ca-certificates -y
 	fi
 	# An old version of easy-rsa was available by default in some openvpn packages
@@ -234,7 +236,7 @@ else
 	openvpn --genkey --secret /etc/openvpn/ta.key
 	# Generate server.conf
 	echo "port $PORT
-proto udp
+proto tcp
 dev tun
 sndbuf 0
 rcvbuf 0
@@ -305,7 +307,7 @@ crl-verify crl.pem" >> /etc/openvpn/server.conf
 		# We don't use --add-service=openvpn because that would only work with
 		# the default port. Using both permanent and not permanent rules to
 		# avoid a firewalld reload.
-		firewall-cmd --zone=public --add-port=$PORT/udp
+		firewall-cmd --zone=public --add-port=$PORT/tcp
 		firewall-cmd --zone=trusted --add-source=10.8.0.0/24
 		firewall-cmd --permanent --zone=public --add-port=$PORT/udp
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/24
