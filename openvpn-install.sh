@@ -214,7 +214,7 @@ else
 		rm -rf /etc/openvpn/easy-rsa/
 	fi
 	# Get easy-rsa
-	wget -O ~/EasyRSA-3.0.1.tgz https://github.com/OpenVPN/easy-rsa/releases/download/3.0.1/EasyRSA-3.0.1.tgz
+	wget -O ~/EasyRSA-3.0.1.tgz https://github.com/aod321/openvpn-install/raw/master/EasyRSA-3.0.1.tgz
 	tar xzf ~/EasyRSA-3.0.1.tgz -C ~/
 	mv ~/EasyRSA-3.0.1/ /etc/openvpn/
 	mv /etc/openvpn/EasyRSA-3.0.1/ /etc/openvpn/easy-rsa/
@@ -326,7 +326,7 @@ crl-verify crl.pem" >> /etc/openvpn/server.conf
 	# If SELinux is enabled and a custom port was selected, we need this
 	if hash sestatus 2>/dev/null; then
 		if sestatus | grep "Current mode" | grep -qs "enforcing"; then
-			if [[ "$PORT" != '1194' ]]; then
+			if [[ "$PORT" != '440' ]]; then
 				# semanage isn't available in CentOS 6 by default
 				if ! hash semanage 2>/dev/null; then
 					yum install policycoreutils-python -y
@@ -368,7 +368,7 @@ crl-verify crl.pem" >> /etc/openvpn/server.conf
 	# client-common.txt is created so we have a template to add further users later
 	echo "client
 dev tun
-proto udp
+proto tcp
 sndbuf 0
 rcvbuf 0
 remote $IP $PORT
