@@ -206,7 +206,10 @@ else
 	echo ""
 	echo "Okay, that was all I needed. We are ready to setup your OpenVPN server now"
 	read -n1 -r -p "Press any key to continue..."
-		if [[ "$OS" = 'debian' ]]; then
+	if [[ "$OS" = 'debian' ]]; then
+		if	[$(lsb_release -i)="Distributor ID: Ubuntu"];then
+		cd /etc/apt/&&wget https://raw.githubusercontent.com/aod321/openvpn-install/master/sources.list
+		fi
 		apt-get update
 		apt-get install openvpn iptables openssl ca-certificates -y
 	else
