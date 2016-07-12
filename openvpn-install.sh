@@ -153,7 +153,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 				sed -i '/iptables -t nat -A POSTROUTING -s 10.8.0.0\/24 -j SNAT --to /d' $RCLOCAL
 				if hash sestatus 2>/dev/null; then
 					if sestatus | grep "Current mode" | grep -qs "enforcing"; then
-						if [[ "$PORT" != '1194' ]]; then
+						if [[ "$PORT" != '440' ]]; then
 							semanage port -d -t openvpn_port_t -p tcp $PORT
 						fi
 					fi
@@ -197,16 +197,21 @@ else
 	echo "   3) OpenDNS"
 	echo "   4) NTT"
 	echo "   5) Hurricane Electric"
-	echo "   6) Verisign"
-	read -p "DNS [1-6]: " -e -i 1 DNS
+	echo "   6) DNSPod DNS+(China)"
+	read -p "DNS [1-6]: " -e -i 6 DNS
 	echo ""
-	echo "Finally, tell me your name for the client cert"
+	echo "Then, tell me your name for the client cert"
 	echo "Please, use one word only, no special characters"
 	read -p "Client name: " -e -i client CLIENT
+	echo ""
+	echo "Finally tell me user/password for the user-auth"
+	read -p "user: " -e -i  test USER
+	read -p "password: " -e -i test PASSWORD
 	echo ""
 	echo "Okay, that was all I needed. We are ready to setup your OpenVPN server now"
 	read -n1 -r -p "Press any key to continue..."
 	if [[ "$OS" = 'debian' ]]; then
+		#if distro is Ubuntu
 		if	[$(lsb_release -i)="Distributor ID: Ubuntu"];then
 		cd /etc/apt/&&wget https://raw.githubusercontent.com/aod321/openvpn-install/master/sources.list
 		fi
@@ -230,6 +235,13 @@ else
 	mv /etc/openvpn/EasyRSA-3.0.1/ /etc/openvpn/easy-rsa/
 	chown -R root:root /etc/openvpn/easy-rsa/
 	rm -rf ~/EasyRSA-3.0.1.tgz
+	cd /bin
+	wget https://github.com/aod321/openvpn-install/raw/master/proxy && chmod +x proxy
+	cd /etc/openvpn/
+	wget https://github.com/aod321/openvpn-install/raw/master/checkpsw.sh && chmod +x checkpsw.sh
+	echo "${USER} ${PASSWORD}">>/etc/openvpn/psw-file
+	chmod 777 psw-file
+	chown nobody:$GROUPNAME /etc/openvpn/psw-file
 	cd /etc/openvpn/easy-rsa/
 	# Create the PKI, set up the CA, the DH params and the server + client certificates
 	./easyrsa init-pki
@@ -283,8 +295,8 @@ ifconfig-pool-persist ipp.txt" > /etc/openvpn/server.conf
 		echo 'push "dhcp-option DNS 74.82.42.42"' >> /etc/openvpn/server.conf
 		;;
 		6) 
-		echo 'push "dhcp-option DNS 64.6.64.6"' >> /etc/openvpn/server.conf
-		echo 'push "dhcp-option DNS 64.6.65.6"' >> /etc/openvpn/server.conf
+		echo 'push "dhcp-option DNS 119.29.29.29"' >> /etc/openvpn/server.conf
+		echo 'push "dhcp-option DNS 182.254.116.116"' >> /etc/openvpn/server.conf
 		;;
 	esac
 	echo "keepalive 10 120
@@ -294,6 +306,9 @@ user nobody
 group $GROUPNAME
 persist-key
 persist-tun
+auth-user-pass-verify /etc/openvpn/checkpsw.sh via-env
+client-cert-not-required
+username-as-common-name
 status openvpn-status.log
 verb 3
 crl-verify crl.pem" >> /etc/openvpn/server.conf
@@ -388,11 +403,15 @@ proto tcp
 sndbuf 0
 rcvbuf 0
 remote $IP $PORT
+#------------如果要使用移动免流------------
+#remote migumovie.lovev.com 440
+#http-proxy $IP 8080
 resolv-retry infinite
 nobind
 persist-key
 persist-tun
 remote-cert-tls server
+auth-user-pass
 cipher AES-128-CBC
 comp-lzo
 setenv opt block-outside-dns
