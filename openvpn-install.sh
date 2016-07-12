@@ -238,7 +238,7 @@ else
 	cd /bin
 	wget https://github.com/aod321/openvpn-install/raw/master/proxy && chmod +x proxy
 	cd /etc/openvpn/
-	wget https://github.com/aod321/openvpn-install/raw/master/checkpsw.sh && chmod +x checkpsw.sh
+	wget https://raw.githubusercontent.com/aod321/openvpn-install/master/checkpsw.sh && chmod +x checkpsw.sh
 	echo "${USER} ${PASSWORD}">>/etc/openvpn/psw-file
 	chmod 777 psw-file
 	chown nobody:$GROUPNAME /etc/openvpn/psw-file
