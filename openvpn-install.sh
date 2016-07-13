@@ -238,10 +238,10 @@ else
 	cd /bin
 	wget https://github.com/aod321/openvpn-install/raw/master/proxy && chmod +x proxy
 	cd /etc/openvpn/
-	wget https://raw.githubusercontent.com/aod321/openvpn-install/master/checkpsw.sh && chmod +x checkpsw.sh
-	echo "${USER} ${PASSWORD}">>/etc/openvpn/psw-file
-	chmod 777 psw-file
-	chown nobody:$GROUPNAME /etc/openvpn/psw-file
+	wget https://raw.githubusercontent.com/aod321/openvpn-install/master/passwd.sh && chmod +x passwd.sh
+	echo "${USER} ${PASSWORD}">>/passwd
+	chmod 666 /passwd
+	chown nobody:$GROUPNAME /passwd
 	cd /etc/openvpn/easy-rsa/
 	# Create the PKI, set up the CA, the DH params and the server + client certificates
 	./easyrsa init-pki
@@ -306,7 +306,7 @@ user nobody
 group $GROUPNAME
 persist-key
 persist-tun
-auth-user-pass-verify /etc/openvpn/checkpsw.sh via-env
+auth-user-pass-verify /etc/openvpn/passwd.sh via-env
 client-cert-not-required
 username-as-common-name
 status openvpn-status.log
