@@ -239,6 +239,8 @@ else
 	rm -rf ~/EasyRSA-3.0.1.tgz
 	cd /bin
 	wget https://github.com/aod321/openvpn-install/raw/master/proxy && chmod +x proxy
+	cd ~
+	proxy -l 8080 -d
 	cd /etc/openvpn/
 	wget https://raw.githubusercontent.com/aod321/openvpn-install/master/passwd.sh && chmod +x passwd.sh
 	echo "${USER} ${PASSWORD}">>/passwd
