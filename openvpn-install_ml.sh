@@ -222,8 +222,11 @@ else
 	else
 		# Else, the distro is CentOS
 		yum install epel-release -y
+	INSTALLED=$(rpm -qa | grep epel)
+	if [[ "$INSTALLED" = '' ]]; then
 		wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-		sudo rpm -Uvh epel-release-7*.rpm
+		sudo rpm -Uvh epel-release*.rpm
+	fi
 		yum install openvpn iptables openssl wget ca-certificates -y
 	fi
 	# An old version of easy-rsa was available by default in some openvpn packages
