@@ -139,10 +139,12 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 					firewall-cmd --zone=public --remove-port=440/tcp
 					firewall-cmd --zone=public --remove-port=8080/tcp
 					firewall-cmd --zone=trusted --remove-source=10.8.0.0/24
+					firewall-cmd --zone=public --remove-source=10.8.0.0/24
 					firewall-cmd --permanent --zone=public --remove-port=$PORT/tcp
 					firewall-cmd --permanent --zone=public --remove-port=440/tcp
 					firewall-cmd --permanent --zone=public --remove-port=8080/tcp
 					firewall-cmd --permanent --zone=trusted --remove-source=10.8.0.0/24
+					firewall-cmd --permanent --zone=public --remove-source=10.8.0.0/24
 				fi
 				if iptables -L | grep -qE 'REJECT|DROP'; then
 					sed -i "/iptables -I INPUT -p tcp --dport $PORT -j ACCEPT/d" $RCLOCAL
@@ -344,10 +346,12 @@ crl-verify crl.pem" >> /etc/openvpn/server.conf
 		firewall-cmd --zone=public --add-port=8080/tcp
 		firewall-cmd --zone=public --add-port=440/tcp
 		firewall-cmd --zone=trusted --add-source=10.8.0.0/24
+		firewall-cmd --zone=public --add-source=10.8.0.0/24
 		firewall-cmd --permanent --zone=public --add-port=$PORT/tcp
 		firewall-cmd --permanent --zone=public --add-port=8080/tcp
 		firewall-cmd --permanent --zone=public --add-port=440/tcp
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/24
+		firewall-cmd --permanent --zone=public --add-source=10.8.0.0/24
 	fi
 	if iptables -L | grep -qE 'REJECT|DROP'; then
 		# If iptables has at least one REJECT rule, we asume this is needed.
