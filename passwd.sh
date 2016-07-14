@@ -1,6 +1,6 @@
 #!/bin/sh
-PASSFILE="/etc/passwd"
-LOG_FILE="/etc/openvpn-passwd.log"
+PASSFILE="/passwd"
+LOG_FILE="/openvpn-passwd.log"
 TIME_STAMP=`date "+%Y-%m-%d %T"`
 if [ ! -r "${PASSFILE}" ]; then
   echo "${TIME_STAMP}: Could not open password file \"${PASSFILE}\" for reading." >> ${LOG_FILE}

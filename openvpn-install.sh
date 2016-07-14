@@ -119,6 +119,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 			rm -rf pki/reqs/$CLIENT.req
 			rm -rf pki/private/$CLIENT.key
 			rm -rf pki/issued/$CLIENT.crt
+			rm -rf /root/epel-release-latest-7.noarch.rpm
 			rm -rf /etc/openvpn/crl.pem
 			cp /etc/openvpn/easy-rsa/pki/crl.pem /etc/openvpn/crl.pem
 			# CRL is read with each client connection, when OpenVPN is dropped to nobody
@@ -164,6 +165,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 					yum remove openvpn -y
 				fi
 				rm -rf /etc/openvpn
+				rm -rf /root/passwd
 				rm -rf /usr/share/doc/openvpn*
 				echo ""
 				echo "OpenVPN removed!"
@@ -306,6 +308,7 @@ user nobody
 group $GROUPNAME
 persist-key
 persist-tun
+script-security 3 system
 auth-user-pass-verify /etc/openvpn/passwd.sh via-env
 client-cert-not-required
 username-as-common-name
