@@ -229,7 +229,7 @@ else
 		wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 		sudo rpm -Uvh epel-release*.rpm
 	fi
-		yum install openvpn iptables openssl wget ca-certificates -y
+		yum install openvpn iptables-services openssl wget ca-certificates -y
 	fi
 	# An old version of easy-rsa was available by default in some openvpn packages
 	if [[ -d /etc/openvpn/easy-rsa/ ]]; then
@@ -305,7 +305,7 @@ ifconfig-pool-persist ipp.txt" > /etc/openvpn/server.conf
 		;;
 		6) 
 		echo 'push "dhcp-option DNS 119.29.29.29"' >> /etc/openvpn/server.conf
-		echo 'push "dhcp-option DNS 182.254.116.116"' >> /etc/openvpn/server.conf
+		echo 'push "dhcp-option DNS 114.114.114.114"' >> /etc/openvpn/server.conf
 		;;
 	esac
 	echo "keepalive 10 120
@@ -336,6 +336,9 @@ crl-verify crl.pem" >> /etc/openvpn/server.conf
 	# Avoid an unneeded reboot
 	echo 1 > /proc/sys/net/ipv4/ip_forward
 	# Set NAT for the VPN subnet
+	systemctl enable iptables
+	systemctl start iptables
+	
 	iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP
 	sed -i "1 a\iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP" $RCLOCAL
 	if pgrep firewalld; then
@@ -346,12 +349,10 @@ crl-verify crl.pem" >> /etc/openvpn/server.conf
 		firewall-cmd --zone=public --add-port=8080/tcp
 		firewall-cmd --zone=public --add-port=440/tcp
 		firewall-cmd --zone=trusted --add-source=10.8.0.0/24
-		firewall-cmd --zone=public --add-source=10.8.0.0/24
 		firewall-cmd --permanent --zone=public --add-port=$PORT/tcp
 		firewall-cmd --permanent --zone=public --add-port=8080/tcp
 		firewall-cmd --permanent --zone=public --add-port=440/tcp
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/24
-		firewall-cmd --permanent --zone=public --add-source=10.8.0.0/24
 	fi
 	if iptables -L | grep -qE 'REJECT|DROP'; then
 		# If iptables has at least one REJECT rule, we asume this is needed.
@@ -422,6 +423,7 @@ resolv-retry infinite
 nobind
 persist-key
 persist-tun
+redirect-gateway
 remote-cert-tls server
 auth-user-pass
 cipher AES-128-CBC
