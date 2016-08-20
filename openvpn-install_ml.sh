@@ -350,6 +350,11 @@ crl-verify crl.pem" >> /etc/openvpn/server.conf
 		firewall-cmd --permanent --zone=public --add-port=8080/tcp
 		firewall-cmd --permanent --zone=public --add-port=440/tcp
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/24
+		firewall-cmd --permanent --direct --add-rule ipv4 filter POSTROUTING 0 -t nat -s 10.10.0.0/24 -o eth0 -j MASQUERADE -t nat
+		firewall-cmd --premanent --direct --add-rule ipv4 filter FWDI_external_allow 0 -j ACCEPT
+		firewall-cmd --permanent --add-service openvpn
+		firewall-cmd --permanent --add-masquerade
+		firewall-cmd --reload
 	fi
 	if iptables -L | grep -qE 'REJECT|DROP'; then
 		# If iptables has at least one REJECT rule, we asume this is needed.
@@ -358,11 +363,16 @@ crl-verify crl.pem" >> /etc/openvpn/server.conf
 		iptables -I INPUT -p tcp --dport $PORT -j ACCEPT
 		iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT
 		iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+		iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
+		iptables -t nat -A POSTROUTING -j MASQUERADE 
 		sed -i "1 a\iptables -I INPUT -p tcp --dport $PORT -j ACCEPT" $RCLOCAL
 		sed -i "1 a\iptables -I INPUT -p tcp --dport 8080 -j ACCEPT" $RCLOCAL
 		sed -i "1 a\iptables -I INPUT -p tcp --dport 440 -j ACCEPT" $RCLOCAL
 		sed -i "1 a\iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT" $RCLOCAL
 		sed -i "1 a\iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT" $RCLOCAL
+		service iptables save
+		service iptables restart
+		chkconfig iptables on
 	fi
 	# If SELinux is enabled and a custom port was selected, we need this
 	if hash sestatus 2>/dev/null; then
