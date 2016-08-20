@@ -336,9 +336,6 @@ crl-verify crl.pem" >> /etc/openvpn/server.conf
 	# Avoid an unneeded reboot
 	echo 1 > /proc/sys/net/ipv4/ip_forward
 	# Set NAT for the VPN subnet
-	systemctl enable iptables
-	systemctl start iptables
-	
 	iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP
 	sed -i "1 a\iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP" $RCLOCAL
 	if pgrep firewalld; then
@@ -389,6 +386,7 @@ crl-verify crl.pem" >> /etc/openvpn/server.conf
 		fi
 	else
 		if pgrep systemd-journal; then
+			systemctl restart firewalld
 			systemctl restart openvpn@server.service
 			systemctl enable openvpn@server.service
 		else
